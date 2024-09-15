@@ -1,11 +1,10 @@
 # The producer logic will send random
 # transaction messages to the RabbitMQ queue every 10-40 seconds.
 
-import json
 import random
 import time
 
-from config import ORG_COUNT, logger
+from config import ORG_COUNT
 from rabbitmq import get_rabbitmq_channel, publish_message
 
 

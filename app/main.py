@@ -3,7 +3,6 @@
 # consumer, and KeyDB updater in separate threads.
 import logging
 import threading
-import time
 
 from consumer import consume_messages
 from db import initialize_db

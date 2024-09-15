@@ -27,10 +27,12 @@ def update_keydb():
     )
     providers = cur.fetchall()
     for provider_id, provider_name, initial_value in providers:
-        # Query will return 0 instead of NULL when there are no transactions for the given provider_id.
+        # Query will return 0 instead of NULL
+        # when there are no transactions for the given provider_id.
         cur.execute(
             """
-            SELECT COALESCE(SUM(transaction_value), 0) FROM historical_transactions WHERE provider_id = %s;
+            SELECT COALESCE(SUM(transaction_value), 0)
+            FROM historical_transactions WHERE provider_id = %s;
         """,
             (provider_id,),
         )
@@ -40,7 +42,8 @@ def update_keydb():
         r.set(key, total_value)
 
         logger.info(
-            f"Updated KeyDB: {key} = {total_value} at {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}"
+            f'Updated KeyDB: {key} = {total_value} at'
+            f" {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())}"
         )
 
     cur.close()
