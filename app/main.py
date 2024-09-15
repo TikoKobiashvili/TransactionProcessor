@@ -1,14 +1,13 @@
 # main.py
 # This script is responsible for starting the producer,
 # consumer, and KeyDB updater in separate threads.
-import time
-
-from db import initialize_db
-from producer import produce_messages
-from consumer import consume_messages
-from keydb_updater import schedule_keydb_updates
-import threading
 import logging
+import threading
+
+from consumer import consume_messages
+from db import initialize_db
+from keydb_updater import schedule_keydb_updates
+from producer import produce_messages
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -32,5 +31,5 @@ def main():
     produce_messages()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
