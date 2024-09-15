@@ -132,10 +132,9 @@ venv.bak/
 .idea
 
 # Local data
-./keydb_data
 ./postgres_data
 ./rabbitmq_data
-
+./keydb_data
 # Spyder project settings
 .spyderproject
 .spyproject
