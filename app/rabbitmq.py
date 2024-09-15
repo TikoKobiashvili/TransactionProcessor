@@ -1,10 +1,16 @@
-
 # rabbitmq.py
 import json
+import time
 
 import pika
-from config import RABBITMQ_HOST, RABBITMQ_PORT, RABBITMQ_USER, RABBITMQ_PASSWORD, QUEUE_NAME, logger
-import time
+from config import (
+    QUEUE_NAME,
+    RABBITMQ_HOST,
+    RABBITMQ_PASSWORD,
+    RABBITMQ_PORT,
+    RABBITMQ_USER,
+    logger,
+)
 
 
 def get_rabbitmq_channel():
@@ -13,18 +19,18 @@ def get_rabbitmq_channel():
     while attempt_count < 10:
         try:
             credentials = pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD)
-            connection = pika.BlockingConnection(pika.ConnectionParameters(
-                host=RABBITMQ_HOST,
-                port=RABBITMQ_PORT,
-                credentials=credentials
-            ))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(
+                    host=RABBITMQ_HOST, port=RABBITMQ_PORT, credentials=credentials
+                )
+            )
             channel = connection.channel()
             channel.queue_declare(queue=QUEUE_NAME, durable=True)
-            logger.info("Connected to RabbitMQ")
+            logger.info('Connected to RabbitMQ')
             return channel
         except pika.exceptions.AMQPConnectionError:
             attempt_count += 1
-            logger.warning(f"Reconnecting to RabbitMQ, attempt {attempt_count}")
+            logger.warning(f'Reconnecting to RabbitMQ, attempt {attempt_count}')
             time.sleep(2)
     logger.error("Couldn't connect to RabbitMQ")
     return None
@@ -32,16 +38,13 @@ def get_rabbitmq_channel():
 
 def publish_message(channel, id, value):
     """Publish a message to RabbitMQ."""
-    message = {
-        "id": id,
-        "value": value
-    }
+    message = {'id': id, 'value': value}
     channel.basic_publish(
         exchange='',
         routing_key=QUEUE_NAME,
         body=json.dumps(message),
         properties=pika.BasicProperties(
             delivery_mode=2,  # Make message persistent
-        )
+        ),
     )
-    logger.info(f"Sent message: {message}")
+    logger.info(f'Sent message: {message}')

@@ -4,7 +4,8 @@
 import json
 import random
 import time
-from config import logger, ORG_COUNT
+
+from config import ORG_COUNT, logger
 from rabbitmq import get_rabbitmq_channel, publish_message
 
 
