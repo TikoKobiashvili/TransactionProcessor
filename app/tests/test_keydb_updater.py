@@ -1,10 +1,9 @@
+import threading
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
-import threading
-import time
-
-from keydb_updater import update_keydb, schedule_keydb_updates
+from keydb_updater import schedule_keydb_updates, update_keydb
 
 
 @patch('keydb_updater.redis.StrictRedis')
@@ -32,14 +31,16 @@ def test_update_keydb(mock_get_db_connection, mock_redis):
     # Mock the fetchone method to return sums for each provider
     mock_cursor.fetchone.side_effect = [
         (300,),  # for provider 1 (Visa)
-        (-200,)  # for provider 2 (Mastercard)
+        (-200,),  # for provider 2 (Mastercard)
     ]
 
     update_keydb()
 
     # Check that redis.set was called with correct values
     mock_redis_instance.set.assert_any_call('1_Visa', '1300')  # 1000 initial + 300 transaction
-    mock_redis_instance.set.assert_any_call('2_Mastercard', '1800')  # 2000 initial - 200 transaction
+    mock_redis_instance.set.assert_any_call(
+        '2_Mastercard', '1800'
+    )  # 2000 initial - 200 transaction
 
     # Ensure the cursor and connection were closed
     mock_cursor.close.assert_called_once()
@@ -53,7 +54,9 @@ def test_update_keydb(mock_get_db_connection, mock_redis):
 def start_keydb_thread():
     """Fixture to start the KeyDB thread."""
     with patch('keydb_updater.update_keydb') as mock_update_keydb:
-        keydb_thread = threading.Thread(target=schedule_keydb_updates, args=(1,))  # 1-second interval for testing
+        keydb_thread = threading.Thread(
+            target=schedule_keydb_updates, args=(1,)
+        )  # 1-second interval for testing
         keydb_thread.daemon = True
         keydb_thread.start()
         # Give the thread a moment to start and execute a couple of updates
@@ -79,5 +82,6 @@ def test_keydb_update_timing(mock_get_db_connection, start_keydb_thread):
     # Calculate intervals
     intervals = [t2 - t1 for t1, t2 in zip(call_times, call_times[1:])]
 
-    # Check that the intervals are within ±1 second of the expected interval (1 second in this test)
-    assert all(0.9 <= interval <= 1.1 for interval in intervals), f"Intervals: {intervals}"
+    # Check that the intervals are within ±1 second of the expected interval
+    # (1 second in this test)
+    assert all(0.9 <= interval <= 1.1 for interval in intervals), f'Intervals: {intervals}'

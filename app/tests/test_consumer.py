@@ -1,8 +1,8 @@
+import json
 import re
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
-import json
 from consumer import process_message
 
 
@@ -45,17 +45,22 @@ def test_process_message_success(mock_get_db_connection, mock_channel, mock_conn
 
     process_message(mock_channel, method, None, body)
 
-    actual_calls = [normalize_sql_commands(call[0][0]) for call in mock_cursor.execute.call_args_list]
+    actual_calls = [
+        normalize_sql_commands(call[0][0]) for call in mock_cursor.execute.call_args_list
+    ]
 
     expected_calls = [
-        normalize_sql_commands("SELECT COUNT(*) FROM initial_data WHERE id = %s;"),
-        normalize_sql_commands("INSERT INTO historical_transactions (provider_id, transaction_value) VALUES (%s, %s)")
+        normalize_sql_commands('SELECT COUNT(*) FROM initial_data WHERE id = %s;'),
+        normalize_sql_commands(
+            'INSERT INTO historical_transactions (provider_id, transaction_value) VALUES (%s, %s)'
+        ),
     ]
 
     # Assert that expected SQL commands were executed
     for expected in expected_calls:
-        assert any(expected in actual for actual in
-                   actual_calls), f"Expected SQL command '{expected}' not found in actual calls."
+        assert any(
+            expected in actual for actual in actual_calls
+        ), f"Expected SQL command '{expected}' not found in actual calls."
 
     mock_conn.commit.assert_called_once()
     mock_channel.basic_ack.assert_called_once_with(delivery_tag='tag')
@@ -77,15 +82,16 @@ def test_process_message_provider_not_found(mock_get_db_connection, mock_channel
 
     process_message(mock_channel, method, None, body)
 
-    actual_calls = [normalize_sql_commands(call[0][0]) for call in mock_cursor.execute.call_args_list]
-    expected_calls = [
-        normalize_sql_commands("SELECT COUNT(*) FROM initial_data WHERE id = %s;")
+    actual_calls = [
+        normalize_sql_commands(call[0][0]) for call in mock_cursor.execute.call_args_list
     ]
+    expected_calls = [normalize_sql_commands('SELECT COUNT(*) FROM initial_data WHERE id = %s;')]
 
     # Assert that expected SQL commands were executed
     for expected in expected_calls:
-        assert any(expected in actual for actual in
-                   actual_calls), f"Expected SQL command '{expected}' not found in actual calls."
+        assert any(
+            expected in actual for actual in actual_calls
+        ), f"Expected SQL command '{expected}' not found in actual calls."
 
     mock_channel.basic_nack.assert_called_once_with(delivery_tag='tag')
     mock_cursor.close.assert_called()
