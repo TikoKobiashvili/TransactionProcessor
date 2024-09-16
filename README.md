@@ -42,6 +42,23 @@ To start the application, use the following Docker Compose command:
 docker-compose up
 ```
 
+## Running Tests
+
+To run tests and generate coverage reports, use the following command:
+
+```bash
+ docker-compose run --no-deps app bash -c "coverage run -m pytest app/tests && coverage report"
+```
+
+## Pre-commit Checks
+
+Ensure code quality and formatting by running pre-commit checks:
+
+```bash
+pre-commit run --all-files
+```
+
+
 # Environment Configuration
 
 ### Setting up Environment Variables

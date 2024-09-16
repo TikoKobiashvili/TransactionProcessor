@@ -3,3 +3,7 @@ pika
 redis
 python-dotenv
 pre-commit
+pytest
+pytest-mock
+
+coverage==7.2.1
